@@ -76,6 +76,7 @@ class _loginPageState extends State<loginPage> {
   @override
   Widget build(BuildContext context) {
     setinitializeFirebase();
+
     return Scaffold(
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

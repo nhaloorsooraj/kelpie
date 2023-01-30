@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 
 var tempID = FirebaseAuth.instance.currentUser?.email;
 var userID = tempID?.replaceAll('.', 'DOT');
+var status = "Waiting for Response....";
 
 final uploadRef = FirebaseDatabase.instance.ref(userID);
 
@@ -36,7 +37,35 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+final readRef = FirebaseDatabase.instance.ref(userID! + "/LED_VALUE");
+
 class _MyHomePageState extends State<MyHomePage> {
+  dynamic ledStatus() {
+    readRef.onValue.listen((DatabaseEvent databaseEvent) {
+      var statusLed = databaseEvent.snapshot.value;
+
+      switch (statusLed) {
+        case 1:
+          setState(() {
+            status = "Motor Turned On..!";
+          });
+
+          break;
+
+        case 0:
+          setState(() {
+            status = "Motor Turned Off..!";
+          });
+
+          break;
+        default:
+          setState(() {
+            status = "Waiting for Response....";
+          });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       backgroundColor: MaterialStatePropertyAll(Colors.green)),
                   onPressed: () {
                     uploadRef.update({'REQ_STATUS': 1});
+                    ledStatus();
                   },
                   child: const Text(
                     "ON",
@@ -103,6 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       backgroundColor: MaterialStatePropertyAll(Colors.red)),
                   onPressed: () {
                     uploadRef.update({'REQ_STATUS': 0});
+                    ledStatus();
                   },
                   child: const Text("OFF",
                       style: TextStyle(
@@ -110,10 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 0, 50),
+            padding: EdgeInsets.fromLTRB(20, 50, 0, 50),
             alignment: Alignment.centerLeft,
-            child: const Text(
-              "STATUS :",
+            child: Text(
+              "STATUS : $status",
               style: TextStyle(
                   fontFamily: 'segoe',
                   fontWeight: FontWeight.bold,
@@ -128,13 +159,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
+                  onPressed: () {
+                    readRef.onValue.listen((DatabaseEvent databaseEvent) {
+                      var statusLed = databaseEvent.snapshot.value;
+                      if (statusLed == 0) {
+                        signout();
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const loginPage()));
+                      } else {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("WARNING !"),
+                                content: Text(
+                                    "Please Turn OFF Motor ,If problem still exist there maybe problem connecting with device."),
+                                actions: [
+                                  TextButton(
+                                      child: const Text("I understand"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      })
+                                ],
+                              );
+                            });
+                      }
+                    });
+
                     // ignore: use_build_context_synchronously
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const loginPage()));
                   },
                   child: const Text("LogOut"),
                 ),
@@ -145,4 +199,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+signout() async {
+  await FirebaseAuth.instance.signOut();
 }
