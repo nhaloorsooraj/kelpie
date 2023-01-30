@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "64834070706",
+    "firebase_url": "https://kelpie-a8758-default-rtdb.firebaseio.com",
+    "project_id": "kelpie-a8758",
+    "storage_bucket": "kelpie-a8758.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64834070706:android:2430277a107846730581ab",
+        "android_client_info": {
+          "package_name": "com.bitinc.kelpie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "64834070706-52c2241mapto6sj14ecs36f2ecd7etg8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTA-XA7nhCrsE-0_ITIXfl7g3sJdPfET8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "64834070706-52c2241mapto6sj14ecs36f2ecd7etg8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
