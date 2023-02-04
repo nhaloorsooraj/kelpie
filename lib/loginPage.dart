@@ -5,6 +5,7 @@ import 'package:kelpie/main.dart';
 import 'package:kelpie/signupPage.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 
 // If you need to use FirebaseAuth directly, make sure to hide EmailAuthProvider:
@@ -24,7 +25,7 @@ class _loginPageState extends State<loginPage> {
     if (user != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => MyHomePage(),
+          builder: (context) => const MyHomePage(),
         ),
       );
     }
