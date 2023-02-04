@@ -187,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
               )),
           Container(
               alignment: Alignment.center,
-              padding: const EdgeInsets.fromLTRB(20, 60, 0, 60),
+              padding: const EdgeInsets.fromLTRB(20, 40, 0, 30),
               child: const Text(
                 "MOTOR CONTROLS",
                 style: TextStyle(
@@ -253,8 +253,19 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(
                   width: 300,
                   child: SfLinearGauge(
-                    minimum: 0,
-                    maximum: 400,
+                    minimum: 100,
+                    maximum: 300,
+                    ranges: const [
+                      LinearGaugeRange(
+                        startValue: 0,
+                        endValue: 200,
+                        color: Colors.orange,
+                      ),
+                      LinearGaugeRange(
+                          startValue: 200, endValue: 250, color: Colors.green),
+                      LinearGaugeRange(
+                          startValue: 250, endValue: 400, color: Colors.red)
+                    ],
                     markerPointers: [
                       LinearShapePointer(value: dVolt.toDouble())
                     ],
