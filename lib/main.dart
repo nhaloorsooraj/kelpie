@@ -6,11 +6,18 @@ import 'package:kelpie/loginPage.dart';
 import 'package:firebase_database/firebase_database.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
+import 'package:kelpie/networkConnection.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'dart:async';
 
 var tempID = FirebaseAuth.instance.currentUser?.email;
 var userID = tempID?.replaceAll('.', 'DOT');
-var status = "Waiting for Response....";
+var status = "Check Internet Connection";
+late StreamSubscription subscription;
+bool isDeviceConnected = false;
+bool isInitialized = false;
 var dVolt = 0;
 
 final uploadRef = FirebaseDatabase.instance.ref(userID);
@@ -45,9 +52,26 @@ class MyHomePage extends StatefulWidget {
 
 final readRef = FirebaseDatabase.instance.ref(userID! + "/LED_VALUE");
 final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_VALUE");
-// ignore: non_constant_identifier_names
 
+// ignore: non_constant_identifier_names
 class _MyHomePageState extends State<MyHomePage> {
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          if (!isDeviceConnected) {
+            setState(() {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const NetworkConnection()));
+            });
+          }
+        },
+      );
+
+  ////////////////////////////////////////
   dynamic voltageRead() {
     readVoltRef.onValue.listen((DatabaseEvent databaseEvent) {
       dynamic readVolt = databaseEvent.snapshot.value;
@@ -107,7 +131,22 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     ledStatus();
     voltageRead();
+    _initializeAsyncDependencies();
     super.initState();
+  }
+
+  Future<void> _initializeAsyncDependencies() async {
+    getConnectivity();
+    setState(() {
+      isInitialized = true;
+    });
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+
+    super.dispose();
   }
 
   @override
@@ -185,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 0, 50),
+            padding: const EdgeInsets.fromLTRB(20, 50, 0, 30),
             alignment: Alignment.center,
             child: Text(
               status,
@@ -199,6 +238,18 @@ class _MyHomePageState extends State<MyHomePage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(10),
+                  child: const Text(
+                    "VOLTAGE",
+                    style: TextStyle(
+                      fontFamily: "segoe",
+                      fontSize: 25,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
+                  )),
               SizedBox(
                   width: 300,
                   child: SfLinearGauge(
@@ -209,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   )),
               Container(
-                  padding: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.all(10),
                   child: Text(
                     "$dVolt",
                     style: const TextStyle(

@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 
+import 'dart:async';
+
 // If you need to use FirebaseAuth directly, make sure to hide EmailAuthProvider:
 // import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 
@@ -19,6 +21,10 @@ class loginPage extends StatefulWidget {
 }
 
 class _loginPageState extends State<loginPage> {
+/////////////////////////////
+
+///////////////////////////
+
   Future<FirebaseApp> setinitializeFirebase() async {
     FirebaseApp firebaseApp = await Firebase.initializeApp();
     User? user = FirebaseAuth.instance.currentUser;
@@ -65,6 +71,11 @@ class _loginPageState extends State<loginPage> {
             );
           });
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
