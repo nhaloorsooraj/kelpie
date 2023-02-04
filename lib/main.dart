@@ -1,18 +1,24 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kelpie/loginPage.dart';
 import 'package:firebase_database/firebase_database.dart';
+// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 var tempID = FirebaseAuth.instance.currentUser?.email;
 var userID = tempID?.replaceAll('.', 'DOT');
 var status = "Waiting for Response....";
+var dVolt = 0;
 
 final uploadRef = FirebaseDatabase.instance.ref(userID);
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -38,24 +44,55 @@ class MyHomePage extends StatefulWidget {
 }
 
 final readRef = FirebaseDatabase.instance.ref(userID! + "/LED_VALUE");
+final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_VALUE");
+// ignore: non_constant_identifier_names
 
 class _MyHomePageState extends State<MyHomePage> {
+  dynamic voltageRead() {
+    readVoltRef.onValue.listen((DatabaseEvent databaseEvent) {
+      dynamic readVolt = databaseEvent.snapshot.value;
+      if (readVolt == null) {
+        dVolt = 0;
+      } else {
+        setState(() {
+          dVolt = readVolt;
+        });
+      }
+    });
+  }
+
+  ///////////////////////////////////////////////////////
   dynamic ledStatus() {
     readRef.onValue.listen((DatabaseEvent databaseEvent) {
       var statusLed = databaseEvent.snapshot.value;
 
       switch (statusLed) {
+        case 0:
+          setState(() {
+            status = "Motor Turned OFF";
+          });
+
+          break;
         case 1:
           setState(() {
-            status = "Motor Turned On..!";
+            status = "Motor Turned ON";
           });
 
           break;
 
-        case 0:
+        case 2:
           setState(() {
-            status = "Motor Turned Off..!";
+            status = "Wireless Connection Lost..!";
           });
+
+          break;
+
+        case 3:
+          {
+            setState(() {
+              status = "LINE FAULT";
+            });
+          }
 
           break;
         default:
@@ -64,6 +101,13 @@ class _MyHomePageState extends State<MyHomePage> {
           });
       }
     });
+  }
+
+  @override
+  void initState() {
+    ledStatus();
+    voltageRead();
+    super.initState();
   }
 
   @override
@@ -103,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontSize: 32),
               )),
           Container(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               padding: const EdgeInsets.fromLTRB(20, 60, 0, 60),
               child: const Text(
                 "MOTOR CONTROLS",
@@ -141,16 +185,40 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Container(
-            padding: EdgeInsets.fromLTRB(20, 50, 0, 50),
-            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.fromLTRB(20, 50, 0, 50),
+            alignment: Alignment.center,
             child: Text(
-              "STATUS : $status",
-              style: TextStyle(
+              status,
+              style: const TextStyle(
                   fontFamily: 'segoe',
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                   color: Colors.black45),
             ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                  width: 300,
+                  child: SfLinearGauge(
+                    minimum: 0,
+                    maximum: 400,
+                    markerPointers: [
+                      LinearShapePointer(value: dVolt.toDouble())
+                    ],
+                  )),
+              Container(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text(
+                    "$dVolt",
+                    style: const TextStyle(
+                        fontFamily: 'SevenSegment',
+                        fontStyle: FontStyle.italic,
+                        fontSize: 45,
+                        fontWeight: FontWeight.w700),
+                  ))
+            ],
           ),
           Expanded(
             child: Align(
@@ -174,8 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: const Text("WARNING !"),
-                                content: Text(
-                                    "Please Turn OFF Motor ,If problem still exist there maybe problem connecting with device."),
+                                content: const Text(
+                                    "Please Turn OFF Motor,\n\nIf problem still exist there maybe problem connecting with device."),
                                 actions: [
                                   TextButton(
                                       child: const Text("I understand"),
