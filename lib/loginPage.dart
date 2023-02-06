@@ -199,6 +199,23 @@ class _loginPageState extends State<loginPage> {
                     if (_formKey.currentState!.validate()) {
                       FirebaseAuth.instance
                           .sendPasswordResetEmail(email: emailController.text);
+
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                                title: const Text("Success"),
+                                content: const Text(
+                                    "Password reset link has been send to your email.\n\nWait for few seconds before trying again! "),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("Ok"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  )
+                                ]);
+                          });
                     }
                   },
                   child: const Text(
