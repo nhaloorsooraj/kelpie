@@ -55,6 +55,13 @@ final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_VALUE");
 
 // ignore: non_constant_identifier_names
 class _MyHomePageState extends State<MyHomePage> {
+  initialSettings() {
+    uploadRef.update({'LED_VALUE': 0});
+    uploadRef.update({'REQ_STATUS': 0});
+    uploadRef.update({'VOLTAGE_STATUS': 0});
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////
   getConnectivity() =>
       subscription = Connectivity().onConnectivityChanged.listen(
         (ConnectivityResult result) async {
@@ -71,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       );
 
-  ////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
   dynamic voltageRead() {
     readVoltRef.onValue.listen((DatabaseEvent databaseEvent) {
       dynamic readVolt = databaseEvent.snapshot.value;
@@ -85,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  ///////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////
   dynamic ledStatus() {
     readRef.onValue.listen((DatabaseEvent databaseEvent) {
       var statusLed = databaseEvent.snapshot.value;
@@ -126,9 +133,11 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
   }
+  //////////////////////////////////////////////////////////////////////////////
 
   @override
   void initState() {
+    initialSettings();
     ledStatus();
     voltageRead();
     _initializeAsyncDependencies();
