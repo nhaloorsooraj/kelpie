@@ -60,13 +60,13 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-final readRef = FirebaseDatabase.instance.ref(userID! + "/LED_VALUE");
-final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_VALUE");
+final readRef = FirebaseDatabase.instance.ref(userID! + "/DEVICE_VALUE");
+final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_STATUS");
 
 // ignore: non_constant_identifier_names
 class _MyHomePageState extends State<MyHomePage> {
   initialSettings() {
-    uploadRef.update({'LED_VALUE': 0});
+    uploadRef.update({'DEVICE_VALUE': 0});
     uploadRef.update({'REQ_STATUS': 0});
     uploadRef.update({'VOLTAGE_STATUS': 0});
   }
