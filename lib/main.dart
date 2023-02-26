@@ -1,12 +1,15 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
-
+//
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kelpie/loginPage.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/services.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 import 'package:kelpie/networkConnection.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -25,6 +28,8 @@ final uploadRef = FirebaseDatabase.instance.ref(userID);
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom]);
 
   runApp(const MyApp());
 }
@@ -35,11 +40,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const loginPage(),
-    );
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: AnimatedSplashScreen(
+            splash: Image.asset('assets/splash_ico.png'),
+            splashIconSize: 450,
+            backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+            duration: 3000,
+            pageTransitionType: PageTransitionType.topToBottom,
+            nextScreen: const loginPage()));
   }
 }
 
@@ -291,7 +301,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ))
             ],
           ),
-          Expanded(
+          /* Expanded(
             child: Align(
               alignment: Alignment.bottomCenter,
               child: SizedBox(
@@ -314,10 +324,10 @@ class _MyHomePageState extends State<MyHomePage> {
                               return AlertDialog(
                                 title: const Text("WARNING !"),
                                 content: const Text(
-                                    "Please Turn OFF Motor,\n\nIf problem still exist there maybe problem connecting with device."),
+                                    "Please Turn OFF Motor,\n\nIf problem still exist, there maybe trouble connecting with your device."),
                                 actions: [
                                   TextButton(
-                                      child: const Text("I understand"),
+                                      child: const Text(""),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       })
@@ -333,13 +343,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-          ),
+          ),*/
         ],
       ),
     );
   }
 }
 
+
+/*
 signout() async {
   await FirebaseAuth.instance.signOut();
 }
+*/

@@ -1,7 +1,8 @@
 // ignore_for_file: file_names, camel_case_types, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:kelpie/main.dart';
+import 'package:kelpie/CardPage.dart';
+
 import 'package:kelpie/signupPage.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,7 +28,7 @@ class _loginPageState extends State<loginPage> {
     if (user != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const MyHomePage(),
+          builder: (context) => const CardPage(),
         ),
       );
     }
@@ -47,7 +48,7 @@ class _loginPageState extends State<loginPage> {
         .then((result) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MyHomePage()),
+        MaterialPageRoute(builder: (context) => const CardPage()),
       );
     }).catchError((err) {
       showDialog(
@@ -113,7 +114,7 @@ class _loginPageState extends State<loginPage> {
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
               child: const Text(
-                "For better future",
+                "For Better Future",
                 style: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.w100,
