@@ -14,6 +14,7 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'dart:async';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 var tempID = FirebaseAuth.instance.currentUser?.email;
 var userID = tempID?.replaceAll('.', 'DOT');
@@ -30,6 +31,16 @@ Future main() async {
   await Firebase.initializeApp();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom]);
+  AwesomeNotifications().initialize("", [
+    NotificationChannel(
+      channelKey: 'basic',
+      channelName: 'basic notification',
+      channelDescription: 'channelDescription',
+      enableVibration: true,
+      channelShowBadge: true,
+      importance: NotificationImportance.High,
+    )
+  ]);
 
   runApp(const MyApp());
 }
@@ -103,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////
-  dynamic ledStatus() {
+  ledStatus() {
     readRef.onValue.listen((DatabaseEvent databaseEvent) {
       var statusLed = databaseEvent.snapshot.value;
 
@@ -112,11 +123,12 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             status = "Motor Turned OFF";
           });
-
+          AwesomeNotifications().dismissAllNotifications();
           break;
         case 1:
           setState(() {
             status = "Motor Turned ON";
+            showNotification();
           });
 
           break;
@@ -124,17 +136,22 @@ class _MyHomePageState extends State<MyHomePage> {
         case 2:
           setState(() {
             status = "DRY RUN ! ";
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("WARNING : DRY RUN DETECTED ! "),
-            ));
           });
+          if (ScaffoldMessenger.of(context).mounted) {
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("WARNING : DRY RUN DETECTED ! "),
+              ),
+            );
+          }
 
           break;
 
         case 3:
           {
             setState(() {
-              status = "LINE FAULT";
+              status = "ConnectionLost";
             });
           }
 
@@ -143,6 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             status = "Waiting for Response....";
           });
+          break;
       }
     });
   }
@@ -354,9 +372,28 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-
 /*
 signout() async {
   await FirebaseAuth.instance.signOut();
 }
 */
+
+void showNotification() async {
+  bool isallowed = await AwesomeNotifications().isNotificationAllowed();
+  if (!isallowed) {
+    //no permission of local notification
+    AwesomeNotifications().requestPermissionToSendNotifications();
+  } else {
+    //show notification
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+      //simgple notification
+      id: 123,
+      channelKey: 'basic', //set configuration wuth key "basic"
+      title: 'Kelpie : MOTOR IS RUNNING',
+      body: 'This is to notify you the motor is running !',
+      autoDismissible: true,
+      locked: true,
+    ));
+  }
+}
