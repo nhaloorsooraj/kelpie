@@ -123,7 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
         case 2:
           setState(() {
-            status = "Wireless Connection Lost..!";
+            status = "DRY RUN ! ";
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("WARNING : DRY RUN DETECTED ! "),
+            ));
           });
 
           break;
@@ -224,6 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       backgroundColor: MaterialStatePropertyAll(Colors.green)),
                   onPressed: () {
                     uploadRef.update({'REQ_STATUS': 1});
+
                     ledStatus();
                   },
                   child: const Text(

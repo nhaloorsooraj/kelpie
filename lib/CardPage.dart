@@ -9,6 +9,9 @@ import 'package:kelpie/main.dart';
 
 import 'loginPage.dart';
 
+final user = FirebaseAuth.instance.currentUser;
+var userEmail = user!.email;
+
 class CardPage extends StatefulWidget {
   const CardPage({super.key});
 
@@ -29,17 +32,35 @@ class _CardPageState extends State<CardPage> {
               decoration: const BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                Image.asset(
-                  "assets/icon.png",
-                  width: 50,
-                  height: 50,
-                ),
-                const Text(
-                  "Kelpie",
-                  style: TextStyle(fontSize: 40, color: Colors.white),
-                ),
-              ]),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            "assets/icon.png",
+                            width: 50,
+                            height: 50,
+                          ),
+                          const Text(
+                            "Kelpie",
+                            style: TextStyle(fontSize: 40, color: Colors.white),
+                          ),
+                        ]),
+                  ),
+                  Container(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        userEmail.toString(),
+                        style: const TextStyle(
+                            color: Colors.amber,
+                            fontSize: 18,
+                            fontStyle: FontStyle.normal),
+                      )),
+                ],
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.star),
