@@ -84,7 +84,7 @@ class _signupPageState extends State<signupPage> {
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
               child: const Text(
-                "Getting Started!",
+                "Get Set Ready!",
                 style: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.w100,

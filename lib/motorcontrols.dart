@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
 var status = "Check Internet Connection";
@@ -11,7 +10,10 @@ var userID = tempID?.replaceAll('.', 'DOT');
 final uploadRef = FirebaseDatabase.instance.ref(userID);
 final readRef = FirebaseDatabase.instance.ref('${userID!}/DEVICE_VALUE');
 final readVoltRef = FirebaseDatabase.instance.ref('${userID!}/VOLTAGE_STATUS');
+final readCurrRef = FirebaseDatabase.instance.ref('${userID!}/CURRENT_STATUS');
+
 var dVolt = 0;
+var dCurr = 0;
 
 class MotorControls extends StatefulWidget {
   const MotorControls({super.key});
@@ -21,6 +23,21 @@ class MotorControls extends StatefulWidget {
 }
 
 class _MotorControlsState extends State<MotorControls> {
+//////////////////////////////////////////////////////////////////
+
+  dynamic currentRead() {
+    readCurrRef.onValue.listen((DatabaseEvent databaseEvent) {
+      dynamic readCurr = databaseEvent.snapshot.value;
+      if (readCurr == null) {
+        dCurr = 0;
+      } else {
+        setState(() {
+          dCurr = readCurr;
+        });
+      }
+    });
+  }
+
   //////////////////////////////////READ VOLTAGE///////////////////////////////////////////////////////////
   dynamic voltageRead() {
     readVoltRef.onValue.listen((DatabaseEvent databaseEvent) {
@@ -38,21 +55,26 @@ class _MotorControlsState extends State<MotorControls> {
   //////////////////////////////////// SERVER RESPONSE /////////////////////////////////////////////////////////
   motorStatus() {
     readRef.onValue.listen((DatabaseEvent databaseEvent) {
-      var statusLed = databaseEvent.snapshot.value;
+      var motorstatus = databaseEvent.snapshot.value;
+      bool ismounted = false;
 
-      switch (statusLed) {
+      switch (motorstatus) {
         case 0:
           setState(() {
             status = "Motor Turned OFF";
           });
-          dismissNotification();
-
+          AwesomeNotifications()
+              .dismissNotificationsByChannelKey("motor_notifications");
+          ismounted = false;
           break;
         case 1:
           setState(() {
             status = "Motor Turned ON";
+            if (ismounted == false) {
+              showNotification();
+              ismounted = true;
+            }
           });
-          showNotification();
 
           break;
 
@@ -93,6 +115,7 @@ class _MotorControlsState extends State<MotorControls> {
   void initState() {
     motorStatus();
     voltageRead();
+    currentRead();
     super.initState();
   }
 
@@ -113,8 +136,8 @@ class _MotorControlsState extends State<MotorControls> {
             padding: const EdgeInsets.all(50),
             child: Image.asset(
               "assets/motor_ico.png",
-              height: 100,
-              width: 100,
+              height: 90,
+              width: 90,
             ),
           ),
           Row(
@@ -156,53 +179,437 @@ class _MotorControlsState extends State<MotorControls> {
                   color: Colors.black45),
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(10),
-                  child: const Text(
-                    "VOLTAGE",
-                    style: TextStyle(
-                      fontFamily: "segoe",
-                      fontSize: 25,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
-                  )),
-              SizedBox(
-                  width: 300,
-                  child: SfLinearGauge(
-                    minimum: 100,
-                    maximum: 300,
-                    ranges: const [
-                      LinearGaugeRange(
-                        startValue: 0,
-                        endValue: 200,
-                        color: Colors.orange,
+              Card(
+                elevation: 10,
+                color: Colors.blueGrey,
+                child: SizedBox(
+                  width: 200,
+                  height: 250,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                          alignment: Alignment.topLeft,
+                          padding: const EdgeInsets.all(10),
+                          child: const Text(
+                            "🔋Main Grid ",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontFamily: "segoe",
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          )),
+                      Row(
+                        children: [
+                          Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(10),
+                              child: const Text(
+                                "VOLTAGE : ",
+                                style: TextStyle(
+                                  fontFamily: "segoe",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                ),
+                              )),
+                          Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Text(
+                                "$dVolt",
+                                style: const TextStyle(
+                                    fontFamily: 'SevenSegment',
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 35,
+                                    color: Colors.yellow,
+                                    fontWeight: FontWeight.w800),
+                              )),
+                          Container(
+                              alignment: Alignment.bottomRight,
+                              child: const Text(
+                                "V",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700),
+                              ))
+                        ],
                       ),
-                      LinearGaugeRange(
-                          startValue: 200, endValue: 250, color: Colors.green),
-                      LinearGaugeRange(
-                          startValue: 250, endValue: 400, color: Colors.red)
+                      Row(
+                        children: [
+                          Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(10),
+                              child: const Text(
+                                "CURRENT : ",
+                                style: TextStyle(
+                                  fontFamily: "segoe",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                ),
+                              )),
+                          Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Text(
+                                "$dCurr",
+                                style: const TextStyle(
+                                    fontFamily: 'SevenSegment',
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.yellow,
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.w800),
+                              )),
+                          Container(
+                              alignment: Alignment.bottomRight,
+                              child: const Text(
+                                "A",
+                                style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700),
+                              ))
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                              alignment: Alignment.center,
+                              padding: const EdgeInsets.all(10),
+                              child: const Text(
+                                "POWER : ",
+                                style: TextStyle(
+                                  fontFamily: "segoe",
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.white,
+                                ),
+                              )),
+                          Container(
+                              padding: const EdgeInsets.all(10),
+                              child: Text(
+                                "${dVolt * dCurr}",
+                                style: const TextStyle(
+                                    fontFamily: 'SevenSegment',
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 35,
+                                    color: Colors.yellow,
+                                    fontWeight: FontWeight.w800),
+                              )),
+                          Container(
+                              alignment: Alignment.bottomRight,
+                              child: const Text(
+                                "W",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700),
+                              ))
+                        ],
+                      )
                     ],
-                    markerPointers: [
-                      LinearShapePointer(value: dVolt.toDouble())
+                  ),
+                ),
+              ),
+              Card(
+                elevation: 10,
+                color: Colors.blueGrey,
+                child: SizedBox(
+                  width: 150,
+                  height: 200,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            "Water Usage💧",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(children: [
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(20, 20, 0, 20),
+                          child: Text(
+                            "$dVolt",
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                              color: Colors.amber,
+                              fontSize: 45,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          child: const Text(
+                            "Ltr",
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              color: Colors.amberAccent,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ]),
                     ],
-                  )),
-              Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "$dVolt",
-                    style: const TextStyle(
-                        fontFamily: 'SevenSegment',
-                        fontStyle: FontStyle.italic,
-                        fontSize: 45,
-                        fontWeight: FontWeight.w700),
-                  ))
+                  ),
+                ),
+              ),
             ],
           ),
+          Card(
+            elevation: 15,
+            color: Colors.blueGrey,
+            child: SizedBox(
+              height: 250,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    child: const Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Timer 🔔",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            "Set Interval ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Switch(
+                        value: false,
+                        onChanged: ((value) {}),
+                        activeTrackColor: Colors.green,
+                        activeColor: Colors.lightGreenAccent,
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          "Set Time : ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      Container(
+                          padding: const EdgeInsets.all(10),
+                          child: TextButton(
+                            onPressed: () {
+                              showTimePicker(
+                                builder: (context, child) => MediaQuery(
+                                  data: MediaQuery.of(context)
+                                      .copyWith(alwaysUse24HourFormat: true),
+                                  child: child ?? Container(),
+                                ),
+                                context: context,
+                                initialTime: TimeOfDay.now(),
+                                initialEntryMode: TimePickerEntryMode.inputOnly,
+                              );
+                            },
+                            child: const Text(
+                              "00:00",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 30,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          "Remaing : ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          "00:00 ",
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 238, 113, 74),
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Card(
+            elevation: 10,
+            color: Colors.blueGrey,
+            child: SizedBox(
+              height: 250,
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    child: const Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        "Clock ⏰",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            "Set Clock    ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Switch(
+                        value: false,
+                        onChanged: ((value) {}),
+                        activeTrackColor: Colors.green,
+                        activeColor: Colors.lightGreenAccent,
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          "Start Time : ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: TextButton(
+                          onPressed: () {
+                            showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                          },
+                          child: const Text(
+                            "00:00 ",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: const Text(
+                          "End Time : ",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        child: TextButton(
+                          onPressed: () {
+                            showTimePicker(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                            );
+                          },
+                          child: const Text(
+                            "00:00 ",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -218,19 +625,12 @@ void showNotification() async {
     //show notification
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-      //simgple notification
-      id: 123,
-      channelKey: 'basic', //set configuration wuth key "basic"
+      id: 1,
+      channelKey: 'motor_notifications',
       title: 'Kelpie : MOTOR IS RUNNING',
       body: 'This is to notify you that motor is running !',
-      autoDismissible: true,
+      autoDismissible: false,
       locked: true,
     ));
-  }
-}
-
-void dismissNotification() async {
-  if (await AwesomeNotifications().isNotificationAllowed()) {
-    AwesomeNotifications().dismissAllNotifications();
   }
 }
