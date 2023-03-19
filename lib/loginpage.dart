@@ -1,18 +1,14 @@
-// ignore_for_file: file_names, camel_case_types, use_build_context_synchronously
+// ignore_for_file: file_names, camel_case_types, use_build_context_synchronously, depend_on_referenced_packages
 
 import 'package:flutter/material.dart';
-import 'package:kelpie/CardPage.dart';
+import 'package:kelpie/cardpage.dart';
 
-import 'package:kelpie/signupPage.dart';
+import 'package:kelpie/signup_page.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// ignore: depend_on_referenced_packages
 import 'package:firebase_core/firebase_core.dart';
 
 import 'dart:async';
-
-// If you need to use FirebaseAuth directly, make sure to hide EmailAuthProvider:
-// import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 
 class loginPage extends StatefulWidget {
   const loginPage({super.key});
@@ -72,6 +68,7 @@ class _loginPageState extends State<loginPage> {
 
   @override
   void initState() {
+    setinitializeFirebase();
     super.initState();
   }
 
@@ -84,8 +81,6 @@ class _loginPageState extends State<loginPage> {
 
   @override
   Widget build(BuildContext context) {
-    setinitializeFirebase();
-
     return Scaffold(
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

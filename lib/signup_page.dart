@@ -1,10 +1,9 @@
-// ignore_for_file: file_names, camel_case_types
+// ignore_for_file: camel_case_types
 
 import 'package:flutter/material.dart';
 
-import 'package:kelpie/loginPage.dart';
+import 'package:kelpie/loginpage.dart';
 import 'package:page_transition/page_transition.dart';
-//import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class signupPage extends StatefulWidget {

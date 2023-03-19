@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'dart:async';
-
-import 'package:kelpie/loginPage.dart';
+import 'package:kelpie/loginpage.dart';
 
 late StreamSubscription subscription;
 bool isDeviceConnected = false;

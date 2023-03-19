@@ -1,46 +1,26 @@
-// ignore_for_file: prefer_interpolation_to_compose_strings
-//
-import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:kelpie/loginPage.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter/services.dart';
-// ignore: depend_on_referenced_packages
-import 'package:firebase_core/firebase_core.dart';
-import 'package:kelpie/networkConnection.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'dart:async';
-import 'package:awesome_notifications/awesome_notifications.dart';
+// ignore_for_file: prefer_interpolation_to_compose_strings, depend_on_referenced_packages
 
-var tempID = FirebaseAuth.instance.currentUser?.email;
-var userID = tempID?.replaceAll('.', 'DOT');
-var status = "Check Internet Connection";
-late StreamSubscription subscription;
+//import 'package:kelpie/networkconnection.dart';
+//import 'package:connectivity_plus/connectivity_plus.dart';
+//import 'package:internet_connection_checker/internet_connection_checker.dart';
+
+import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:kelpie/loginpage.dart';
+import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:page_transition/page_transition.dart';
+import 'dart:async';
+
 bool isDeviceConnected = false;
 bool isInitialized = false;
-var dVolt = 0;
-
-final uploadRef = FirebaseDatabase.instance.ref(userID);
+late StreamSubscription subscription;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom]);
-  AwesomeNotifications().initialize("", [
-    NotificationChannel(
-      channelKey: 'basic',
-      channelName: 'basic notification',
-      channelDescription: 'channelDescription',
-      enableVibration: true,
-      channelShowBadge: true,
-      importance: NotificationImportance.High,
-    )
-  ]);
 
   runApp(const MyApp());
 }
@@ -71,108 +51,24 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-final readRef = FirebaseDatabase.instance.ref(userID! + "/DEVICE_VALUE");
-final readVoltRef = FirebaseDatabase.instance.ref(userID! + "/VOLTAGE_STATUS");
-
 // ignore: non_constant_identifier_names
 class _MyHomePageState extends State<MyHomePage> {
-  initialSettings() {
-    uploadRef.update({'DEVICE_VALUE': 0});
-    uploadRef.update({'REQ_STATUS': 0});
-    uploadRef.update({'VOLTAGE_STATUS': 0});
-  }
-
-  ////////////////////////////////////////////////////////////////////////////////////////////
-  getConnectivity() =>
-      subscription = Connectivity().onConnectivityChanged.listen(
-        (ConnectivityResult result) async {
-          isDeviceConnected = await InternetConnectionChecker().hasConnection;
-          if (!isDeviceConnected) {
-            setState(() {
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          const NetworkConnection()));
-            });
-          }
-        },
-      );
-
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  dynamic voltageRead() {
-    readVoltRef.onValue.listen((DatabaseEvent databaseEvent) {
-      dynamic readVolt = databaseEvent.snapshot.value;
-      if (readVolt == null) {
-        dVolt = 0;
-      } else {
-        setState(() {
-          dVolt = readVolt;
-        });
-      }
-    });
-  }
-
-  /////////////////////////////////////////////////////////////////////////////////////////////
-  ledStatus() {
-    readRef.onValue.listen((DatabaseEvent databaseEvent) {
-      var statusLed = databaseEvent.snapshot.value;
-
-      switch (statusLed) {
-        case 0:
+  //////////////////////////// CONNECTIVITY ////////////////////////////////////////////////////////////////
+  /* getConnectivity() {
+    subscription = Connectivity().onConnectivityChanged.listen(
+      (ConnectivityResult result) async {
+        isDeviceConnected = await InternetConnectionChecker().hasConnection;
+        if (!isDeviceConnected) {
           setState(() {
-            status = "Motor Turned OFF";
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) =>
+                        const NetworkConnection()));
           });
-          AwesomeNotifications().dismissAllNotifications();
-          break;
-        case 1:
-          setState(() {
-            status = "Motor Turned ON";
-            showNotification();
-          });
-
-          break;
-
-        case 2:
-          setState(() {
-            status = "DRY RUN ! ";
-          });
-          if (ScaffoldMessenger.of(context).mounted) {
-            ScaffoldMessenger.of(context).removeCurrentSnackBar();
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("WARNING : DRY RUN DETECTED ! "),
-              ),
-            );
-          }
-
-          break;
-
-        case 3:
-          {
-            setState(() {
-              status = "ConnectionLost";
-            });
-          }
-
-          break;
-        default:
-          setState(() {
-            status = "Waiting for Response....";
-          });
-          break;
-      }
-    });
-  }
-  //////////////////////////////////////////////////////////////////////////////
-
-  @override
-  void initState() {
-    initialSettings();
-    ledStatus();
-    voltageRead();
-    _initializeAsyncDependencies();
-    super.initState();
+        }
+      },
+    );
   }
 
   Future<void> _initializeAsyncDependencies() async {
@@ -180,6 +76,12 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       isInitialized = true;
     });
+  }
+*/
+  @override
+  void initState() {
+    // _initializeAsyncDependencies();
+    super.initState();
   }
 
   @override
@@ -191,209 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            alignment: Alignment.topCenter,
-            padding: const EdgeInsets.only(top: 25),
-            child: const SizedBox(
-              height: 200,
-              width: 200,
-              child: Image(
-                image: AssetImage('assets/icon.png'),
-              ),
-            ),
-          ),
-          Container(
-              alignment: Alignment.center,
-              child: const Text(
-                "Kelpie",
-                style: TextStyle(
-                    fontFamily: 'segoe',
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black54,
-                    fontSize: 65),
-              )),
-          Container(
-              alignment: Alignment.center,
-              child: const Text(
-                "CONTROLS",
-                style: TextStyle(
-                    fontFamily: 'segoe',
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black54,
-                    fontSize: 32),
-              )),
-          Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.fromLTRB(20, 40, 0, 30),
-              child: const Text(
-                "MOTOR CONTROLS",
-                style: TextStyle(
-                    fontFamily: 'segoe',
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black54,
-                    fontSize: 25),
-              )),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                  style: const ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(Colors.green)),
-                  onPressed: () {
-                    uploadRef.update({'REQ_STATUS': 1});
-
-                    ledStatus();
-                  },
-                  child: const Text(
-                    "ON",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                  )),
-              ElevatedButton(
-                  style: const ButtonStyle(
-                      backgroundColor: MaterialStatePropertyAll(Colors.red)),
-                  onPressed: () {
-                    uploadRef.update({'REQ_STATUS': 0});
-                    ledStatus();
-                  },
-                  child: const Text("OFF",
-                      style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700))),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 50, 0, 30),
-            alignment: Alignment.center,
-            child: Text(
-              status,
-              style: const TextStyle(
-                  fontFamily: 'segoe',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.black45),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.all(10),
-                  child: const Text(
-                    "VOLTAGE",
-                    style: TextStyle(
-                      fontFamily: "segoe",
-                      fontSize: 25,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black54,
-                    ),
-                  )),
-              SizedBox(
-                  width: 300,
-                  child: SfLinearGauge(
-                    minimum: 100,
-                    maximum: 300,
-                    ranges: const [
-                      LinearGaugeRange(
-                        startValue: 0,
-                        endValue: 200,
-                        color: Colors.orange,
-                      ),
-                      LinearGaugeRange(
-                          startValue: 200, endValue: 250, color: Colors.green),
-                      LinearGaugeRange(
-                          startValue: 250, endValue: 400, color: Colors.red)
-                    ],
-                    markerPointers: [
-                      LinearShapePointer(value: dVolt.toDouble())
-                    ],
-                  )),
-              Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "$dVolt",
-                    style: const TextStyle(
-                        fontFamily: 'SevenSegment',
-                        fontStyle: FontStyle.italic,
-                        fontSize: 45,
-                        fontWeight: FontWeight.w700),
-                  ))
-            ],
-          ),
-          /* Expanded(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    readRef.onValue.listen((DatabaseEvent databaseEvent) {
-                      var statusLed = databaseEvent.snapshot.value;
-                      if (statusLed == 0) {
-                        signout();
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const loginPage()));
-                      } else {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("WARNING !"),
-                                content: const Text(
-                                    "Please Turn OFF Motor,\n\nIf problem still exist, there maybe trouble connecting with your device."),
-                                actions: [
-                                  TextButton(
-                                      child: const Text(""),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      })
-                                ],
-                              );
-                            });
-                      }
-                    });
-
-                    // ignore: use_build_context_synchronously
-                  },
-                  child: const Text("LogOut"),
-                ),
-              ),
-            ),
-          ),*/
-        ],
-      ),
-    );
-  }
-}
-
-/*
-signout() async {
-  await FirebaseAuth.instance.signOut();
-}
-*/
-
-void showNotification() async {
-  bool isallowed = await AwesomeNotifications().isNotificationAllowed();
-  if (!isallowed) {
-    //no permission of local notification
-    AwesomeNotifications().requestPermissionToSendNotifications();
-  } else {
-    //show notification
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-      //simgple notification
-      id: 123,
-      channelKey: 'basic', //set configuration wuth key "basic"
-      title: 'Kelpie : MOTOR IS RUNNING',
-      body: 'This is to notify you the motor is running !',
-      autoDismissible: true,
-      locked: true,
-    ));
+    return const Scaffold();
   }
 }
