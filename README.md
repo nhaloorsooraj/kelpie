@@ -17,6 +17,8 @@ This is a Flutter-based IoT project for building a smart farm. The project provi
 ### The app provides the following features:
 
   + Real-time sensor data
+  + Dry Run Protection
+  + Power usage monitoring
   + Remote control
   + Alerts and notifications
   
@@ -28,3 +30,14 @@ This is a Flutter-based IoT project for building a smart farm. The project provi
 + Dry Run Sensor
 + HLW8012 Module
 
+<br/>
+<br/>
+
+## Future Updates
+
++ Timer , Clock 
++ Pressure monitoring
++ Leakage Detection
++ Flow Rate and Water Usage
++ Valve Control
++ Graphs , Analytics
