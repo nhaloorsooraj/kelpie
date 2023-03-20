@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:kelpie/settings.dart';
 import 'package:kelpie/support.dart';
 import 'package:kelpie/motorcontrols.dart';
 import 'loginpage.dart';
@@ -58,6 +59,20 @@ class _CardPageState extends State<CardPage> {
             ],
           ),
         ),
+        ///// SEttings
+
+        ListTile(
+          leading: const Icon(Icons.settings),
+          title: const Text("Settings"),
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsPage()));
+          },
+        ),
+        const Divider(
+          color: Colors.grey,
+        ),
+        /////Support
 
         ListTile(
           leading: const Icon(Icons.star),
@@ -68,6 +83,7 @@ class _CardPageState extends State<CardPage> {
             /////
           },
         ),
+
         const Divider(
           color: Colors.grey,
         ),
@@ -155,12 +171,12 @@ class _CardPageState extends State<CardPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Image.asset(
-                                "assets/comingsoon_ico.png",
+                                "assets/piping.png",
                                 height: 100,
                                 width: 100,
                               ),
                               const Text(
-                                "Coming Soon",
+                                "Pipings",
                                 style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,

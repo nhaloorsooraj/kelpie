@@ -87,6 +87,7 @@ flutter:
   assets:
    - assets/signinbitmap.png
    - assets/icon.png
+   - assets/piping.png
    - assets/wifilost.png
    - assets/splash_ico.png
    - assets/motor_ico.png
